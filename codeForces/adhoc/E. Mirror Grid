@@ -1,0 +1,295 @@
+/*E. Mirror Grid
+
+* You are given a square grid with 𝑛 rows and 𝑛 columns. Each cell contains either 0 or 1.
+
+* In an operation, you can select a cell of the grid and flip it (from 0→1 or 1→0). Find the minimum number of operations you need to obtain a square that remains the same when rotated 0∘, 90∘, 180∘ and 270∘.
+
+* The picture below shows an example of all rotations of a grid.
+
+* Input
+* The first line contains a single integer 𝑡 (1≤𝑡≤100) — the number of test cases.
+
+* The first line of each test case contains a single integer 𝑛 (1≤𝑛≤100) — the size of the grid.
+
+* Then 𝑛 lines follow, each with 𝑛 characters 𝑎𝑖,𝑗 (0≤𝑎𝑖,𝑗≤1) — the number written in each cell.
+
+* Output
+* For each test case output a single integer  — the minimum number of operations needed to make the square look the same rotated 0∘, 90∘, 180∘ and 270∘.*/
+
+
+
+import java.io.*;
+import java.util.*;
+ 
+ 
+public class Solution {
+    static class Reader {
+        final private int BUFFER_SIZE = 1 << 16;
+        private DataInputStream din;
+        private byte[] buffer;
+        private int bufferPointer, bytesRead;
+ 
+        public Reader(){
+ 
+            din = new DataInputStream(System.in);
+            buffer = new byte[BUFFER_SIZE];
+            bufferPointer = bytesRead = 0;
+        }
+ 
+        public Reader(String file_name) throws IOException{
+ 
+            din = new DataInputStream(
+                    new FileInputStream(file_name));
+            buffer = new byte[BUFFER_SIZE];
+            bufferPointer = bytesRead = 0;
+        }
+ 
+        public String readLine() throws IOException{
+ 
+            byte[] buf = new byte[64]; // line length
+            int cnt = 0, c;
+            while ((c = read()) != -1) {
+                if (c == '\n') {
+                    if (cnt != 0) {
+                        break;
+                    }
+                    else {
+                        continue;
+                    }
+                }
+                buf[cnt++] = (byte)c;
+            }
+            return new String(buf, 0, cnt);
+        }
+ 
+        public int nextInt() throws IOException{
+ 
+            int ret = 0;
+            byte c = read();
+            while (c <= ' ') {
+                c = read();
+            }
+            boolean neg = (c == '-');
+            if (neg)
+                c = read();
+            do {
+                ret = ret * 10 + c - '0';
+            } while ((c = read()) >= '0' && c <= '9');
+ 
+            if (neg)
+                return -ret;
+            return ret;
+        }
+ 
+        public long nextLong() throws IOException{
+ 
+            long ret = 0;
+            byte c = read();
+            while (c <= ' ')
+                c = read();
+            boolean neg = (c == '-');
+            if (neg)
+                c = read();
+            do {
+                ret = ret * 10 + c - '0';
+            } while ((c = read()) >= '0' && c <= '9');
+            if (neg)
+                return -ret;
+            return ret;
+        }
+ 
+        public double nextDouble() throws IOException{
+ 
+            double ret = 0, div = 1;
+            byte c = read();
+            while (c <= ' ')
+                c = read();
+            boolean neg = (c == '-');
+            if (neg)
+                c = read();
+ 
+            do {
+                ret = ret * 10 + c - '0';
+            } while ((c = read()) >= '0' && c <= '9');
+ 
+            if (c == '.') {
+                while ((c = read()) >= '0' && c <= '9') {
+                    ret += (c - '0') / (div *= 10);
+                }
+            }
+ 
+            if (neg)
+                return -ret;
+            return ret;
+        }
+ 
+        private void fillBuffer() throws IOException{
+ 
+            bytesRead = din.read(buffer, bufferPointer = 0,
+                    BUFFER_SIZE);
+            if (bytesRead == -1)
+                buffer[0] = -1;
+        }
+ 
+        private byte read() throws IOException{
+ 
+            if (bufferPointer == bytesRead)
+                fillBuffer();
+            return buffer[bufferPointer++];
+        }
+ 
+        public void close() throws IOException{
+ 
+            if (din == null)
+                return;
+            din.close();
+        }
+    }
+ 
+    class UnionFind {
+        private int[] root;
+        // Use a rank array to record the height of each vertex, i.e., the "rank" of each vertex.
+        private int[] rank;
+        private int size;
+        private int components;
+ 
+        public UnionFind(int size) {
+            root = new int[size];
+            rank = new int[size];
+            this.size = size;
+            components = size;
+            for (int i = 0; i < size; i++) {
+                root[i] = i;
+                rank[i] = 1;
+                // The initial "rank" of each vertex is 1, because each of them is
+                // a standalone vertex with no connection to other vertices.
+            }
+        }
+ 
+        // The find function here is the same as that in the disjoint set with path compression.
+        public int find(int x) {
+            if (x == root[x]) {
+                return x;
+            }
+            return root[x] = find(root[x]);
+        }
+ 
+        // The union function with union by rank
+        public void union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            if (rootX != rootY) {
+                if (rank[rootX] > rank[rootY]) {
+                    root[rootY] = rootX;
+                } else if (rank[rootX] < rank[rootY]) {
+                    root[rootX] = rootY;
+                } else {
+                    root[rootY] = rootX;
+                    rank[rootX] += 1;
+                }
+                components--;
+            }
+        }
+ 
+        public boolean connected(int x, int y) {
+            return find(x) == find(y);
+        }
+        public int getProvinces() {
+            return this.components;
+        }
+    }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    public static void main(String[]args) throws NumberFormatException, IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        PrintWriter pr = new PrintWriter(System.out);
+        int test = Integer.parseInt(br.readLine());
+        for (int t = 0; t < test; t++) {
+            int out = 0;
+            int n = Integer.parseInt(br.readLine());
+            String[][]arr = new String[n][n];
+            for(int i = 0;i<n;i++){
+                arr[i] = br.readLine().split("");
+            }
+ 
+            for(int i=0;i<n;i++){
+                for(int j = 0;j<n;j++){
+                    int zero = 0;
+                    int one = 0;
+                    String a = arr[i][j];
+                    String b =arr [n-1-i][n-1-j];
+                    String c = arr[n-1-j][i];
+                    String d = arr[j][n-1-i];
+                    if(a.equals("1")){
+                        one++;
+                    }
+                    else{
+                        zero++;
+                    }
+                    if(b.equals("1")){
+                        one++;
+                    }
+                    else{
+                        zero++;
+                    }
+                    if(c.equals("1")){
+                        one++;
+                    }
+                    else{
+                        zero++;
+                    }
+                    if(d.equals("1")){
+                        one++;
+                    }
+                    else{
+                        zero++;
+                    }
+                    if(one==4||zero==4){
+                        continue;
+                    }
+                    if(one==zero){
+                        arr[i][j] = arr[n-1-i][n-1-j] = arr[n-1-j][i]= arr[j][n-1-i] = "1";
+                        out+=2;
+                    }
+                    else if(one>zero){
+                        arr[i][j] = arr[n-1-i][n-1-j] = arr[n-1-j][i]= arr[j][n-1-i] = "1";
+                        out+=zero;
+ 
+                    }
+                    else if(zero>one){
+                        arr[i][j] = arr[n-1-i][n-1-j] = arr[n-1-j][i]= arr[j][n-1-i] = "0";
+                        out+=one;
+                    }
+ 
+                }
+ 
+            }
+            pr.println(out);
+            pr.flush();
+ 
+ 
+        }
+ 
+    }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    }
+ 
+ 
+ 
+ 
+ 
+ 
