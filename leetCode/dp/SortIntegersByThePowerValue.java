@@ -25,7 +25,7 @@
 
 class Solution {
     
-    //Implementing Class Pair which Implwmwnta Comp Interface
+    //Implementing Class Pair which Implements Comp Interface
     
     class Pair implements Comparable<Pair>{
         int val;int pow;
